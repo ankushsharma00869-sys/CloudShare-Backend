@@ -18,12 +18,13 @@ public class UserCreditsController {
 
     @GetMapping("/credits")
     public ResponseEntity<?> getUserCredits(){
-       UserCredits userCredits = userCreditsService.getUserCredits();
-      UserCreditsDTO response = UserCreditsDTO.builder()
+        UserCredits userCredits = userCreditsService.getUserCredits();
+        UserCreditsDTO response = UserCreditsDTO.builder()
                 .credits(userCredits.getCredits())
                 .plan(userCredits.getPlan())
+                .maxFileSizeMb(userCreditsService.getMaxFileSizeMb())
                 .build();
 
-      return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 }

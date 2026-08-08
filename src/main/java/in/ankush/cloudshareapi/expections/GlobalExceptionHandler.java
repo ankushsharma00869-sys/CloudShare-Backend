@@ -105,6 +105,12 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(data);
         }
 
+        if (message != null && message.contains("exceeds your plan")) {
+            data.put("status", HttpStatus.PAYLOAD_TOO_LARGE.value());
+            data.put("message", message);
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(data);
+        }
+
         data.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         data.put("message", message);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(data);

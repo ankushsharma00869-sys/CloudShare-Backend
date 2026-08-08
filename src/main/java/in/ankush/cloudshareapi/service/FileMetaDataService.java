@@ -54,6 +54,19 @@ public class FileMetaDataService {
             throw new RuntimeException("Not enough credits to upload files. Please purchase more credits");
         }
 
+        // 🔒 Plan-gated perk: reject files over the current plan's size limit.
+        int maxFileSizeMb = userCreditsService.getMaxFileSizeMb();
+        long maxFileSizeBytes = (long) maxFileSizeMb * 1024 * 1024;
+        for (MultipartFile file : files) {
+            if (file.getSize() > maxFileSizeBytes) {
+                throw new RuntimeException(
+                        "\"" + file.getOriginalFilename() + "\" is " + (file.getSize() / (1024 * 1024)) +
+                                "MB, which exceeds your plan's " + maxFileSizeMb +
+                                "MB limit per file. Upgrade to the Ultimate plan to upload files up to 200MB."
+                );
+            }
+        }
+
         List<FileMetaDataDocument> savedFiles = new ArrayList<>();
         Cloudinary cloudinary = getCloudinary();
 

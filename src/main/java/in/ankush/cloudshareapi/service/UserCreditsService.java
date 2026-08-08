@@ -32,13 +32,13 @@ public class UserCreditsService {
         String userId = userService.getCurrentUser().getId();
         return getUserCredits(userId);
     }
-   public Boolean hashEnoughCredits(int requiredCredits){
+    public Boolean hashEnoughCredits(int requiredCredits){
         UserCredits userCredits = getUserCredits();
         return userCredits.getCredits() >= requiredCredits;
-   }
+    }
 
 
-   public UserCredits consumeCredit(){
+    public UserCredits consumeCredit(){
         UserCredits userCredits = getUserCredits();
 
         if (userCredits.getCredits() <= 0){
@@ -46,14 +46,27 @@ public class UserCreditsService {
         }
         userCredits.setCredits(userCredits.getCredits() - 1);
         return userCreditsRepository.save(userCredits);
-   }
+    }
 
-   public UserCredits addCredits(String userId, Integer creditsToAdd, String plan){
-      UserCredits userCredits =  userCreditsRepository.findByUserId(userId)
+    public UserCredits addCredits(String userId, Integer creditsToAdd, String plan){
+        UserCredits userCredits =  userCreditsRepository.findByUserId(userId)
                 .orElseGet(() -> createInitialCredits(userId));
 
-      userCredits.setCredits(userCredits.getCredits() + creditsToAdd);
-      userCredits.setPlan(plan);
-      return userCreditsRepository.save(userCredits);
-   }
+        userCredits.setCredits(userCredits.getCredits() + creditsToAdd);
+        userCredits.setPlan(plan);
+        return userCreditsRepository.save(userCredits);
+    }
+
+    /**
+     * 🔒 Plan-gated perk: the max single-file upload size depends on the user's plan.
+     * BASIC/PREMIUM stay capped at 25MB; ULTIMATE unlocks up to 200MB (the server's global cap).
+     * This gives Ultimate buyers something tangible beyond "more credits".
+     */
+    public int getMaxFileSizeMb(){
+        String plan = getUserCredits().getPlan();
+        if ("ULTIMATE".equalsIgnoreCase(plan)) {
+            return 200;
+        }
+        return 25;
+    }
 }

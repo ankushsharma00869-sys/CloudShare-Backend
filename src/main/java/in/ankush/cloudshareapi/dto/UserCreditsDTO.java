@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class UserCreditsDTO {
     private  Integer credits;
     private String plan;
+    private Integer maxFileSizeMb; // 🔒 plan-gated perk: Ultimate unlocks larger uploads
 
 }
