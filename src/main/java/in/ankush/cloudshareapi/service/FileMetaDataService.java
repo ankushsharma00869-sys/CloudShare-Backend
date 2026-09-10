@@ -172,8 +172,20 @@ public class FileMetaDataService {
     }
 
     public FileMetaDataDTO getDownloadableFile(String id) {
+        User currentUser = userService.getCurrentUser();
         FileMetaDataDocument file = fileMetaDataRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("File not found"));
+
+        // 🔒 Security fix: this endpoint requires a valid JWT (see SecurityConfig),
+        // but previously did NOT verify the file belonged to the caller, so any
+        // authenticated user could download any other user's private file just by
+        // knowing/guessing its id. Only the owner or a public file may be downloaded here.
+        boolean isOwner = file.getUserId() != null && file.getUserId().equals(currentUser.getId());
+        boolean isPublic = Boolean.TRUE.equals(file.getIsPublic());
+        if (!isOwner && !isPublic) {
+            throw new RuntimeException("Access denied: file does not belong to current user");
+        }
+
         return mapToDTO(file);
     }
 
